@@ -1,0 +1,12 @@
+{
+  "name": "biblioteca-online",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix library-system",
+    "build": "npm run build --prefix library-system",
+    "preview": "npm run preview --prefix library-system"
+  },
+  "dependencies": {
+    "react-router-dom": "^7.10.1"
+  }
+}

@@ -1,49 +1,51 @@
-# Online Library – Software Testing Project
+# Online Library System — App + Software Testing Project
 
-This repository contains an **Online Library** web application and the complete **software testing deliverables** created for the university course **Software Product Testing**.
+A small client-side **library management web app** built with **React + Vite**. Users can browse a book catalog, **borrow** or **buy** books, and track loans and activity history. An **Admin area** is included for managing the catalog and stock.
 
-The project includes:
-- Functional and non-functional requirements (Specs)
-- Test Plan
-- Traceability matrix (FR → TC)
-- Test cases (minimum 5)
-- Bug reports (minimum 5)
-- Auxiliary tests checklist
-- Test automation (Playwright) + evidence (report/screenshot)
-- Gantt planning (included in documentation)
+This repository also includes the complete **Software Product Testing** coursework package: **requirements (functional/visual/non-functional), test plan, auxiliary tests, test cases, bug reports, traceability, and test automation**.
 
 ---
 
-## Features (Application)
-- Books catalog page with book cards (title, author, category, stock, price)
-- Search/filter books by title/author/category
-- Borrow flow (add to Loan Cart)
-- Purchase flow (select quantity, add to Purchase Cart)
-- Internationalization: **RO / EN**
-- Themes: **Light / Dark**
+## What’s inside
 
-> Note: Some parts may behave differently depending on the current build and data seed.
+### Application
+- Register / login
+- Catalog browsing + search (title/author/category)
+- **Borrow** flow: add to Loan Cart (one copy per title) + confirm
+- **Buy** flow: Purchase Cart with quantity + confirm
+- My Loans (return borrowed books)
+- History (borrow/return/buy actions)
+- Admin features: add/update books, update price, manage stock, disable/reactivate, reset demo data
+
+### Testing deliverables
+- **Functional requirements** (core flows: catalog, search, borrow, buy, history)
+- **Visual/UI requirements** (layout, primary colors, card grid, header navigation, Light/Dark)
+- **Non-functional requirements** (performance basics, data consistency, security basics, compatibility, usability)
+- **Test Plan** (scope, strategy, entry/exit criteria, risks, deliverables)
+- **Auxiliary tests** (browser compatibility, UI/responsive checks, security basic checks, performance/persistence)
+- **Test Cases** (executed set included)
+- **Bug Reports** (documented issues with steps, expected vs actual, severity/priority)
+- **Traceability matrix** (FR → TC)
+- **Automation** (Playwright E2E): Smoke + Regression + Client requirements + HTML report
 
 ---
 
-## Project Structure (Suggested)
-- `docs/`  
-  - Final testing documentation PDF (Specs, Test Plan, Test Cases, Bug Reports, etc.)
-  - Gantt chart
-  - Screenshots / evidence
-- `tests/`  
-  - Automated tests (Playwright)
-- `src/`  
-  - Application source code
+## Demo Credentials
+- **Admin:** `admin@local`  
+- **Password:** `admin123`  
+(You can also register a normal user from the Register page.)
 
 ---
 
-## Getting Started
+## Tech Stack
+- React (Vite)
+- React Router
+- ESLint
+- Playwright (E2E automation)
 
-### Prerequisites
-- Node.js (LTS recommended)
-- npm (or yarn/pnpm)
+---
 
-### Install dependencies
+## Run locally
 ```bash
 npm install
+npm run dev

@@ -8,5 +8,8 @@
   },
   "dependencies": {
     "react-router-dom": "^7.10.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
   }
 }

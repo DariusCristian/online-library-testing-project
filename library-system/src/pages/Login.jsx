@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthService } from "../services/auth.service";
+import { useUI } from "../app/ui";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { t } = useUI();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
@@ -34,21 +36,20 @@ export default function Login() {
   return (
     <div className="page auth-page page-center">
       <div className="auth-card">
-        <p className="eyebrow">Biblioteca Online</p>
-        <h1>Autentificare</h1>
-        <p className="muted">
-          Accesează contul tău pentru a rezerva sau cumpăra cărți.
-        </p>
+        <p className="eyebrow">{t("app.brand")}</p>
+        <h1>{t("login.title")}</h1>
+        <p className="muted">{t("login.subtitle")}</p>
 
         {error && <div className="alert alert--error">{error}</div>}
 
         <form className="form-grid" onSubmit={handleSubmit}>
           <label className="input-label">
-            Email
+            {t("form.email")}
             <input
               className="input"
               type="email"
               name="email"
+              data-testid="login-email"
               value={form.email}
               onChange={handleChange}
               required
@@ -56,11 +57,12 @@ export default function Login() {
           </label>
 
           <label className="input-label">
-            Parolă
+            {t("form.password")}
             <input
               className="input"
               type="password"
               name="password"
+              data-testid="login-password"
               value={form.password}
               onChange={handleChange}
               required
@@ -68,13 +70,13 @@ export default function Login() {
             />
           </label>
 
-          <button className="btn btn--primary w-full" type="submit">
-            Intră în cont
+          <button className="btn btn--primary w-full" type="submit" data-testid="login-submit">
+            {t("login.cta")}
           </button>
         </form>
 
         <p className="muted">
-          Nu ai cont? <Link to="/register">Creează unul nou</Link>
+          {t("login.noAccount")} <Link to="/register">{t("login.createAccount")}</Link>
         </p>
       </div>
     </div>

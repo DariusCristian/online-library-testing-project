@@ -4,6 +4,7 @@ import { AuthService } from "../services/auth.service";
 import { CartService } from "../services/cart.service";
 import { Storage, subscribeToStorage } from "../services/storage";
 import { PurchasesService } from "../services/purchases.service";
+import { useUI } from "../app/ui";
 
 const mapBooks = () => {
   // pregătim un lookup rapid pentru detalii despre carte
@@ -18,6 +19,7 @@ const formatPrice = (value) => `${Number(value || 0).toFixed(2)} lei`;
 
 export default function PurchaseCart() {
   const user = AuthService.currentUser();
+  const { t } = useUI();
   const [items, setItems] = useState(() => CartService.purchaseItems());
   const [booksMap, setBooksMap] = useState(() => mapBooks());
   const [message, setMessage] = useState(null);
@@ -47,7 +49,7 @@ export default function PurchaseCart() {
 
   const removeItem = (itemId) => {
     CartService.removePurchase(itemId);
-    setMessage({ type: "success", text: "Cartea a fost eliminată din coș." });
+    setMessage({ type: "success", text: t("msg.purchaseCartRemoved") });
   };
 
   const itemsWithDetails = useMemo(
@@ -64,7 +66,7 @@ export default function PurchaseCart() {
 
   const handleCheckout = () => {
     if (itemsWithDetails.length === 0) {
-      setMessage({ type: "error", text: "Coșul este gol." });
+      setMessage({ type: "error", text: t("msg.purchaseCartEmpty") });
       return;
     }
 
@@ -73,7 +75,7 @@ export default function PurchaseCart() {
     try {
       itemsWithDetails.forEach((item) => {
         if (!item.book) {
-          throw new Error("Anumite cărți nu mai sunt disponibile.");
+          throw new Error(t("msg.purchaseUnavailable"));
         }
         // reaplicăm logica de cumpărare pentru fiecare articol din coș
         PurchasesService.buy(item.bookId, user, item.qty);
@@ -81,7 +83,7 @@ export default function PurchaseCart() {
       CartService.clearPurchaseCart();
       setMessage({
         type: "success",
-        text: "Achiziția a fost procesată. Vezi istoricul pentru detalii.",
+        text: t("msg.purchaseConfirmed"),
       });
     } catch (err) {
       setMessage({ type: "error", text: err.message });
@@ -96,9 +98,9 @@ export default function PurchaseCart() {
       <div className="page-content">
         <div className="page-header">
           <div>
-            <p className="eyebrow">Coș cumpărături</p>
-            <h1>Finalizează achiziția</h1>
-            <p className="muted">Revizuiește titlurile și cantitățile înainte de plată.</p>
+            <p className="eyebrow">{t("nav.cartPurchases")}</p>
+            <h1 data-testid="purchase-cart-title">{t("cartPurchases.title")}</h1>
+            <p className="muted">{t("cartPurchases.subtitle")}</p>
           </div>
         </div>
 
@@ -116,16 +118,16 @@ export default function PurchaseCart() {
         )}
 
         {itemsWithDetails.length === 0 ? (
-          <p className="muted">Coșul este gol.</p>
+          <p className="muted">{t("cartPurchases.empty")}</p>
         ) : (
           <section className="card">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Carte</th>
-                  <th>Preț</th>
-                  <th>Cantitate</th>
-                  <th>Subtotal</th>
+                  <th>{t("cartPurchases.tableBook")}</th>
+                  <th>{t("cartPurchases.tablePrice")}</th>
+                  <th>{t("cartPurchases.tableQty")}</th>
+                  <th>{t("cartPurchases.tableSubtotal")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -133,7 +135,7 @@ export default function PurchaseCart() {
                 {itemsWithDetails.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <strong>{item.book?.title ?? "Carte indisponibilă"}</strong>
+                      <strong>{item.book?.title ?? t("books.unavailable")}</strong>
                       <div className="muted">{item.book?.author}</div>
                     </td>
                     <td>{formatPrice(item.book?.price)}</td>
@@ -154,7 +156,7 @@ export default function PurchaseCart() {
                         type="button"
                         onClick={() => removeItem(item.id)}
                       >
-                        Elimină
+                        {t("btn.remove")}
                       </button>
                     </td>
                   </tr>
@@ -162,7 +164,7 @@ export default function PurchaseCart() {
               </tbody>
             </table>
             <div className="flex-between" style={{ marginTop: "1rem" }}>
-              <strong>Total</strong>
+              <strong>{t("cartPurchases.total")}</strong>
               <strong>{formatPrice(total)}</strong>
             </div>
             <div className="text-right" style={{ marginTop: "1rem" }}>
@@ -172,7 +174,7 @@ export default function PurchaseCart() {
                 onClick={handleCheckout}
                 disabled={submitting}
               >
-                Confirmă cumpărăturile
+                {t("cartPurchases.confirm")}
               </button>
             </div>
           </section>

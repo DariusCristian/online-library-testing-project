@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthService } from "../services/auth.service";
+import { useUI } from "../app/ui";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { t } = useUI();
   const [form, setForm] = useState({ email: "", password: "", confirm: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -15,7 +17,7 @@ export default function Register() {
 
     // validăm local parola dublă înainte de a apela serviciul
     if (form.password !== form.confirm) {
-      setError("Parolele nu coincid");
+      setError(t("msg.passwordMismatch"));
       return;
     }
 
@@ -38,18 +40,16 @@ export default function Register() {
   return (
     <div className="page auth-page page-center">
       <div className="auth-card">
-        <p className="eyebrow">Biblioteca Online</p>
-        <h1>Cont nou</h1>
-        <p className="muted">
-          Creează un cont pentru a împrumuta și cumpăra titluri.
-        </p>
+        <p className="eyebrow">{t("app.brand")}</p>
+        <h1>{t("register.title")}</h1>
+        <p className="muted">{t("register.subtitle")}</p>
 
         {error && <div className="alert alert--error">{error}</div>}
         {success && <div className="alert alert--success">{success}</div>}
 
         <form className="form-grid" onSubmit={handleSubmit}>
           <label className="input-label">
-            Email
+            {t("form.email")}
             <input
               className="input"
               type="email"
@@ -61,7 +61,7 @@ export default function Register() {
           </label>
 
           <label className="input-label">
-            Parolă
+            {t("form.password")}
             <input
               className="input"
               type="password"
@@ -74,7 +74,7 @@ export default function Register() {
           </label>
 
           <label className="input-label">
-            Confirmare parolă
+            {t("form.confirmPassword")}
             <input
               className="input"
               type="password"
@@ -87,12 +87,12 @@ export default function Register() {
           </label>
 
           <button className="btn btn--primary w-full" type="submit">
-            Creează cont
+            {t("register.cta")}
           </button>
         </form>
 
         <p className="muted">
-          Ai deja cont? <Link to="/login">Autentifică-te</Link>
+          {t("register.hasAccount")} <Link to="/login">{t("register.signIn")}</Link>
         </p>
       </div>
     </div>

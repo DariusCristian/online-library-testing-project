@@ -5,9 +5,9 @@ import { AuthService } from "../services/auth.service";
 import { Storage, subscribeToStorage } from "../services/storage";
 import { LoansService } from "../services/loans.service";
 import { HistoryService } from "../services/history.service";
+import { useUI } from "../app/ui";
 import {
   HistoryTypeEmphasis,
-  HistoryTypeLabels,
   HistoryTypes,
   LoanStatus,
   Roles,
@@ -43,6 +43,7 @@ const buildStats = (user) => {
 
 export default function Dashboard() {
   const user = AuthService.currentUser();
+  const { t } = useUI();
   const [stats, setStats] = useState(() => (user ? buildStats(user) : null));
 
   const refreshStats = useCallback(() => {
@@ -70,19 +71,21 @@ export default function Dashboard() {
       <div className="page-content">
         <div className="page-header">
           <div>
-            <p className="eyebrow">Bine ai revenit</p>
-            <h1>{user.email}</h1>
+            <p className="eyebrow">{t("dashboard.welcome")}</p>
+            <h1 data-testid="dashboard-title">{user.email}</h1>
             <p className="muted">
-              Rol:{" "}
-              <strong>{user.role === Roles.ADMIN ? "Administrator" : "Cititor"}</strong>
+              {t("dashboard.role")}:{" "}
+              <strong>
+                {user.role === Roles.ADMIN ? t("dashboard.roleAdmin") : t("dashboard.roleUser")}
+              </strong>
             </p>
           </div>
           <div className="page-header__actions">
             <Link className="btn btn--primary" to="/books">
-              Caută cărți
+              {t("dashboard.searchBooks")}
             </Link>
             <Link className="btn btn--ghost" to="/me/loans">
-              Împrumuturile mele
+              {t("dashboard.myLoans")}
             </Link>
           </div>
         </div>
@@ -90,26 +93,26 @@ export default function Dashboard() {
         {stats && (
           <>
             <section className="card">
-              <h2>Statistici rapide</h2>
+              <h2 data-testid="dashboard-stats">{t("dashboard.quickStats")}</h2>
               <div className="stats-grid">
                 <article className="stat-card">
-                  <p className="stat-label">Cărți active</p>
+                  <p className="stat-label">{t("dashboard.activeBooks")}</p>
                   <p className="stat-value">{stats.activeBooks}</p>
                 </article>
                 <article className="stat-card">
-                  <p className="stat-label">Exemplare disponibile</p>
+                  <p className="stat-label">{t("dashboard.availableCopies")}</p>
                   <p className="stat-value">{stats.totalCopies}</p>
                 </article>
                 <article className="stat-card">
-                  <p className="stat-label">Împrumuturi active</p>
+                  <p className="stat-label">{t("dashboard.activeLoans")}</p>
                   <p className="stat-value">{stats.activeLoans}</p>
                 </article>
                 <article className="stat-card">
-                  <p className="stat-label">Împrumuturi finalizate</p>
+                  <p className="stat-label">{t("dashboard.completedLoans")}</p>
                   <p className="stat-value">{stats.completedLoans}</p>
                 </article>
                 <article className="stat-card">
-                  <p className="stat-label">Cumpărări confirmate</p>
+                  <p className="stat-label">{t("dashboard.purchases")}</p>
                   <p className="stat-value">{stats.totalPurchased}</p>
                 </article>
               </div>
@@ -117,13 +120,13 @@ export default function Dashboard() {
 
             <section className="card">
               <div className="flex-between">
-                <h2>Activitate recentă</h2>
+                <h2>{t("dashboard.recentActivity")}</h2>
                 <Link to="/me/history" className="btn btn--ghost">
-                  Vezi tot istoricul
+                  {t("dashboard.viewHistory")}
                 </Link>
               </div>
               {stats.recentHistory.length === 0 ? (
-                <p className="muted">Momentan nu există activitate.</p>
+                <p className="muted">{t("dashboard.noActivity")}</p>
               ) : (
                 <ul className="list">
                   {stats.recentHistory.map((event) => (
@@ -137,7 +140,7 @@ export default function Dashboard() {
                             .join(" ")
                             .trim()}
                         >
-                          {HistoryTypeLabels[event.type] ?? event.type}
+                          {t(`history.type.${event.type}`)}
                         </span>
                         <span className="muted">{formatDate(event.at)}</span>
                       </div>

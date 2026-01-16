@@ -3,6 +3,7 @@ const hasWindow = () => typeof window !== "undefined";
 const hasStorage = () => hasWindow() && typeof window.localStorage !== "undefined";
 
 const CHANNEL = "library:storage";
+const BACKUP_PREFIX = "backup:";
 
 const broadcast = (key = null) => {
   if (!hasWindow() || typeof window.dispatchEvent !== "function") return;
@@ -19,7 +20,15 @@ export const Storage = {
     if (!hasStorage()) return fallback;
     try {
       const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
+      if (raw) return JSON.parse(raw);
+      const backupRaw = localStorage.getItem(`${BACKUP_PREFIX}${key}`);
+      if (backupRaw) {
+        // restaurăm automat dacă cheia principală a fost ștearsă
+        localStorage.setItem(key, backupRaw);
+        broadcast(key);
+        return JSON.parse(backupRaw);
+      }
+      return fallback;
     } catch (err) {
       console.warn(`[Storage] Failed to read key "${key}"`, err);
       localStorage.removeItem(key);
@@ -30,7 +39,10 @@ export const Storage = {
   set(key, value) {
     if (!hasStorage()) return;
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const payload = JSON.stringify(value);
+      localStorage.setItem(key, payload);
+      // păstrăm o copie de siguranță în localStorage
+      localStorage.setItem(`${BACKUP_PREFIX}${key}`, payload);
       broadcast(key);
     } catch (err) {
       console.error(`[Storage] Failed to write key "${key}"`, err);

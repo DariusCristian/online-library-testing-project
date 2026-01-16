@@ -3,17 +3,40 @@ import { Storage } from "./storage";
 
 const SESSION_KEY = "session_user";
 
+const hasStorage = () =>
+  typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+
+const readSession = () => {
+  if (!hasStorage()) return null;
+  try {
+    const raw = window.localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    window.localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+};
+
+const writeSession = (value) => {
+  if (!hasStorage()) return;
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(value));
+};
+
+const clearSession = () => {
+  if (!hasStorage()) return;
+  window.localStorage.removeItem(SESSION_KEY);
+};
+
 export const AuthService = {
   currentUser() {
-    const raw = sessionStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return readSession();
   },
 
   login(email, password) {
     const users = Storage.get("users");
     const user = users.find((u) => u.email === email && u.password === password);
     if (!user) throw new Error("Email/parolă invalide");
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    writeSession(user);
     return user;
   },
 
@@ -27,6 +50,6 @@ export const AuthService = {
   },
 
   logout() {
-    sessionStorage.removeItem(SESSION_KEY);
+    clearSession();
   },
 };

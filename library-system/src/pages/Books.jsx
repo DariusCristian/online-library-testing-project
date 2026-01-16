@@ -5,11 +5,13 @@ import { BooksService } from "../services/book.service";
 import { CartService } from "../services/cart.service";
 import { AuthService } from "../services/auth.service";
 import { subscribeToStorage } from "../services/storage";
+import { useUI } from "../app/ui";
 
 const formatPrice = (value) => `${Number(value || 0).toFixed(2)} lei`;
 
 export default function Books() {
   const user = AuthService.currentUser();
+  const { t, translateCategory } = useUI();
   const [books, setBooks] = useState(() => BooksService.list());
   const [search, setSearch] = useState("");
   const [qty, setQty] = useState({});
@@ -31,18 +33,18 @@ export default function Books() {
 
   const handleBorrow = (bookId) => {
     CartService.addLoan(bookId);
-    notify("success", "Cartea a fost adăugată în coșul de împrumuturi.");
+    notify("success", t("msg.addLoanCart"));
   };
 
   const handleBuy = (bookId) => {
     const value = Number(qty[bookId] ?? 1);
     if (Number.isNaN(value) || value < 1) {
-      notify("error", "Introduce o cantitate validă.");
+      notify("error", t("msg.invalidQty"));
       return;
     }
     CartService.addPurchase(bookId, value);
     setQty((prev) => ({ ...prev, [bookId]: 1 }));
-    notify("success", "Adăugat în coșul de cumpărături.");
+    notify("success", t("msg.addPurchaseCart"));
   };
 
   useEffect(() => {
@@ -62,25 +64,24 @@ export default function Books() {
       <div className="page-content">
         <div className="page-header">
           <div>
-            <p className="eyebrow">Catalog</p>
-            <h1>Cărți disponibile</h1>
-            <p className="muted">
-              Împrumută sau cumpără titlurile care te interesează.
-            </p>
+            <p className="eyebrow">{t("nav.books")}</p>
+            <h1 data-testid="books-title">{t("books.title")}</h1>
+            <p className="muted">{t("books.subtitle")}</p>
           </div>
           <div className="page-header__actions">
             <input
               className="input"
               style={{ minWidth: "240px" }}
-              placeholder="Caută după titlu, autor sau categorie"
+              placeholder={t("books.searchPlaceholder")}
+              data-testid="books-search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
             <Link className="btn btn--ghost" to="/cart/loans">
-              Coș împrumuturi
+              {t("books.loanCart")}
             </Link>
             <Link className="btn btn--ghost" to="/cart/purchases">
-              Coș cumpărături
+              {t("books.purchaseCart")}
             </Link>
           </div>
         </div>
@@ -99,22 +100,26 @@ export default function Books() {
         )}
 
         {filteredBooks.length === 0 ? (
-          <p className="muted">Nu există cărți după criteriile alese.</p>
+          <p className="muted">{t("books.noResults")}</p>
         ) : (
           <div className="books-grid">
             {filteredBooks.map((book) => (
-              <article key={book.id} className="book-card">
+              <article key={book.id} className="book-card" data-testid="book-card">
                 <div>
-                  <h3 style={{ marginBottom: "0.2rem" }}>{book.title}</h3>
+                  <h3 style={{ marginBottom: "0.2rem" }} data-testid="book-title">
+                    {book.title}
+                  </h3>
                   <p className="muted">de {book.author}</p>
                 </div>
                 <p className="muted" style={{ fontSize: "0.9rem" }}>
-                  {book.description || "Fără descriere"}
+                  {book.description || t("books.noDescription")}
                 </p>
                 <div className="chips">
-                  {book.category && <span className="tag">{book.category}</span>}
+                  {book.category && (
+                    <span className="tag">{translateCategory(book.category)}</span>
+                  )}
                   <span className="tag">
-                    Stoc: {book.available}/{book.total}
+                    {t("books.stock")}: {book.available}/{book.total}
                   </span>
                   <span className="tag tag--success">{formatPrice(book.price)}</span>
                 </div>
@@ -125,11 +130,12 @@ export default function Books() {
                     type="button"
                     onClick={() => handleBorrow(book.id)}
                     disabled={book.available < 1}
+                    data-testid="btn-borrow"
                   >
-                    Împrumută
+                    {t("books.borrow")}
                   </button>
                   <label className="qty-control">
-                    <span className="qty-control__label">Cantitate cumpărare</span>
+                    <span className="qty-control__label">{t("books.qtyLabel")}</span>
                     <div className="qty-control__row">
                       <input
                         className="input qty-control__input"
@@ -145,7 +151,7 @@ export default function Books() {
                         type="button"
                         onClick={() => handleBuy(book.id)}
                       >
-                        Cumpără
+                        {t("books.buy")}
                       </button>
                     </div>
                   </label>

@@ -4,6 +4,7 @@ import { AuthService } from "../services/auth.service";
 import { BooksService } from "../services/book.service";
 import { PurchasesService } from "../services/purchases.service";
 import { Storage, seed, subscribeToStorage } from "../services/storage";
+import { useUI } from "../app/ui";
 
 const CATEGORY_OPTIONS = [
   "Fictiune",
@@ -29,6 +30,7 @@ const createEmptyForm = () => ({
 
 export default function Admin() {
   const user = AuthService.currentUser();
+  const { t, translateCategory } = useUI();
   const readBooks = () => {
     // normalizează lista din storage (asigură vector chiar dacă e coruptă)
     const data = Storage.get("books");
@@ -65,7 +67,7 @@ export default function Admin() {
     setStockInputs({});
     setPriceInputs({});
     setForm(createEmptyForm());
-    setMessage("Datele demo au fost resetate.");
+    setMessage(t("admin.msgResetDemo"));
   };
 
   const handleAdd = (event) => {
@@ -73,7 +75,7 @@ export default function Admin() {
     setError("");
     setMessage("");
     if (!form.title.trim() || !form.author.trim()) {
-      setError("Titlul și autorul sunt obligatorii.");
+      setError(t("admin.errTitleAuthor"));
       return;
     }
 
@@ -92,7 +94,7 @@ export default function Admin() {
       );
       setForm(createEmptyForm());
       reload();
-      setMessage("Cartea a fost adăugată.");
+      setMessage(t("admin.msgAdded"));
     } catch (err) {
       setError(err.message);
     }
@@ -103,13 +105,13 @@ export default function Admin() {
     setMessage("");
     const qty = Number(stockInputs[bookId] || 1);
     if (Number.isNaN(qty) || qty < 1) {
-      setError("Introduce o cantitate validă pentru stoc.");
+      setError(t("admin.errInvalidQty"));
       return;
     }
     try {
       PurchasesService.addStock(bookId, user, qty);
       reload();
-      setMessage("Stoc actualizat.");
+      setMessage(t("admin.msgStockUpdated"));
       setStockInputs((prev) => ({ ...prev, [bookId]: 1 }));
     } catch (err) {
       setError(err.message);
@@ -121,18 +123,18 @@ export default function Admin() {
     setMessage("");
     const value = priceInputs[bookId];
     if (value === undefined) {
-      setError("Introdu un preț nou.");
+      setError(t("admin.errPriceRequired"));
       return;
     }
     const price = Number(value);
     if (Number.isNaN(price) || price < 0) {
-      setError("Prețul trebuie să fie pozitiv.");
+      setError(t("admin.errPricePositive"));
       return;
     }
     try {
       BooksService.update(bookId, { price }, user);
       reload();
-      setMessage("Preț actualizat.");
+      setMessage(t("admin.msgPriceUpdated"));
     } catch (err) {
       setError(err.message);
     }
@@ -144,10 +146,10 @@ export default function Admin() {
     try {
       if (book.isActive === false) {
         BooksService.update(book.id, { isActive: true }, user);
-        setMessage("Cartea a fost reactivată.");
+        setMessage(t("admin.msgReactivated"));
       } else {
         BooksService.remove(book.id, user);
-        setMessage("Cartea a fost dezactivată.");
+        setMessage(t("admin.msgDeactivated"));
       }
       reload();
     } catch (err) {
@@ -165,15 +167,13 @@ export default function Admin() {
       <div className="page-content">
         <div className="page-header">
           <div>
-            <p className="eyebrow">Administrare</p>
-            <h1>Gestionare catalog</h1>
-            <p className="muted">
-              Adaugă, actualizează și dezactivează cărțile disponibile.
-            </p>
+            <p className="eyebrow">{t("nav.admin")}</p>
+            <h1>{t("admin.title")}</h1>
+            <p className="muted">{t("admin.subtitle")}</p>
           </div>
           <div className="page-header__actions">
             <button className="btn btn--ghost" type="button" onClick={handleResetData}>
-              Resetează datele demo
+              {t("admin.reset")}
             </button>
           </div>
         </div>
@@ -192,10 +192,10 @@ export default function Admin() {
         )}
 
         <section className="card" style={{ marginBottom: "1.5rem" }}>
-          <h2>Adaugă o carte</h2>
+          <h2>{t("admin.addBook")}</h2>
           <form className="form-grid" onSubmit={handleAdd}>
             <label className="input-label">
-              Titlu
+              {t("admin.fieldTitle")}
               <input
                 className="input"
                 value={form.title}
@@ -206,7 +206,7 @@ export default function Admin() {
               />
             </label>
             <label className="input-label">
-              Autor
+              {t("admin.fieldAuthor")}
               <input
                 className="input"
                 value={form.author}
@@ -217,7 +217,7 @@ export default function Admin() {
               />
             </label>
             <label className="input-label">
-              ISBN
+              {t("admin.fieldIsbn")}
               <input
                 className="input"
                 value={form.isbn}
@@ -227,7 +227,7 @@ export default function Admin() {
               />
             </label>
             <label className="input-label">
-              Categorie
+              {t("admin.fieldCategory")}
               <select
                 className="input"
                 value={form.category}
@@ -237,13 +237,13 @@ export default function Admin() {
               >
                 {CATEGORY_OPTIONS.map((category) => (
                   <option key={category} value={category}>
-                    {category}
+                    {translateCategory(category)}
                   </option>
                 ))}
               </select>
             </label>
             <label className="input-label">
-              Descriere
+              {t("admin.fieldDescription")}
               <textarea
                 className="input"
                 rows={3}
@@ -258,7 +258,7 @@ export default function Admin() {
             </label>
             <div className="flex" style={{ flexWrap: "wrap" }}>
               <label className="input-label" style={{ flex: "1 1 140px" }}>
-                Preț (lei)
+                {t("admin.fieldPrice")}
                 <input
                   className="input"
                   type="number"
@@ -271,7 +271,7 @@ export default function Admin() {
                 />
               </label>
               <label className="input-label" style={{ flex: "1 1 140px" }}>
-                Exemplare
+                {t("admin.fieldCopies")}
                 <input
                   className="input"
                   type="number"
@@ -286,16 +286,16 @@ export default function Admin() {
             </div>
             <div className="text-right">
               <button className="btn btn--primary" type="submit">
-                Salvează carte
+                {t("admin.saveBook")}
               </button>
             </div>
           </form>
         </section>
 
         <section className="card">
-          <h2>Catalog curent</h2>
+          <h2>{t("admin.catalog")}</h2>
           {sortedBooks.length === 0 ? (
-            <p className="muted">Nu există cărți în sistem.</p>
+            <p className="muted">{t("admin.none")}</p>
           ) : (
             <div className="form-grid">
               {sortedBooks.map((book) => (
@@ -315,16 +315,16 @@ export default function Admin() {
                         .join(" ")
                         .trim()}
                     >
-                      {book.isActive === false ? "Inactiv" : "Activ"}
+                      {book.isActive === false ? t("admin.statusInactive") : t("admin.statusActive")}
                     </span>
                   </div>
                   <p className="muted">
-                    Stoc: {book.available}/{book.total} — Preț:{" "}
-                    {Number(book.price || 0).toFixed(2)} lei
+                    {t("books.stock")}: {book.available}/{book.total} —{" "}
+                    {t("cartPurchases.tablePrice")}: {Number(book.price || 0).toFixed(2)} lei
                   </p>
                   <div className="flex">
                     <label className="input-label" style={{ flex: "1 1 110px" }}>
-                      Stoc
+                      {t("books.stock")}
                       <input
                         className="input"
                         type="number"
@@ -343,12 +343,12 @@ export default function Admin() {
                       type="button"
                       onClick={() => handleStock(book.id)}
                     >
-                      Adaugă stoc
+                      {t("admin.addStock")}
                     </button>
                   </div>
                   <div className="flex">
                     <label className="input-label" style={{ flex: "1 1 140px" }}>
-                      Preț nou
+                      {t("admin.fieldPrice")}
                       <input
                         className="input"
                         type="number"
@@ -369,7 +369,7 @@ export default function Admin() {
                       type="button"
                       onClick={() => handlePriceUpdate(book.id)}
                     >
-                      Actualizează preț
+                      {t("admin.updatePrice")}
                     </button>
                   </div>
                   <div className="flex">
@@ -378,7 +378,7 @@ export default function Admin() {
                       type="button"
                       onClick={() => toggleActive(book)}
                     >
-                      {book.isActive === false ? "Reactivează" : "Dezactivează"}
+                      {book.isActive === false ? t("admin.reactivate") : t("admin.deactivate")}
                     </button>
                   </div>
                 </article>

@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { AuthService } from "../services/auth.service";
 import { HistoryService } from "../services/history.service";
-import { HistoryTypeEmphasis, HistoryTypeLabels } from "../models/enums";
+import { HistoryTypeEmphasis } from "../models/enums";
 import { subscribeToStorage } from "../services/storage";
+import { useUI } from "../app/ui";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -16,6 +17,7 @@ const formatDate = (value) => {
 export default function MyHistory() {
   const user = AuthService.currentUser();
   const userId = user?.id;
+  const { t } = useUI();
   const [items, setItems] = useState(() => (userId ? HistoryService.forUser(userId) : []));
 
   const reload = useCallback(() => {
@@ -43,15 +45,15 @@ export default function MyHistory() {
       <div className="page-content">
         <div className="page-header">
           <div>
-            <p className="eyebrow">Istoric</p>
-            <h1>Activitatea mea</h1>
-            <p className="muted">Monitorizează toate acțiunile din cont.</p>
+            <p className="eyebrow">{t("nav.history")}</p>
+            <h1 data-testid="history-title">{t("history.title")}</h1>
+            <p className="muted">{t("history.subtitle")}</p>
           </div>
         </div>
 
         <section className="card">
           {items.length === 0 ? (
-            <p className="muted">Încă nu ai nicio activitate înregistrată.</p>
+            <p className="muted">{t("history.empty")}</p>
           ) : (
             <ul className="list">
               {items.map((event) => (
@@ -65,15 +67,21 @@ export default function MyHistory() {
                         .join(" ")
                         .trim()}
                     >
-                      {HistoryTypeLabels[event.type] ?? event.type}
+                      {t(`history.type.${event.type}`)}
                     </span>
                     <span className="muted">{formatDate(event.at)}</span>
                   </div>
                   <p style={{ margin: "0.5rem 0" }}>{event.details}</p>
                   <div className="muted" style={{ fontSize: "0.85rem" }}>
-                    {event.qty && <span style={{ marginRight: "1rem" }}>Cantitate: {event.qty}</span>}
+                    {event.qty && (
+                      <span style={{ marginRight: "1rem" }}>
+                        {t("history.qty")}: {event.qty}
+                      </span>
+                    )}
                     {event.amount != null && (
-                      <span>Valoare: {Number(event.amount).toFixed(2)} lei</span>
+                      <span>
+                        {t("history.amount")}: {Number(event.amount).toFixed(2)} lei
+                      </span>
                     )}
                   </div>
                 </li>

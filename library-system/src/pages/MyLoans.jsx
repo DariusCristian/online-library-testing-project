@@ -3,7 +3,8 @@ import Navbar from "../components/Navbar";
 import { AuthService } from "../services/auth.service";
 import { LoansService } from "../services/loans.service";
 import { Storage, subscribeToStorage } from "../services/storage";
-import { LoanStatus, LoanStatusLabels } from "../models/enums";
+import { LoanStatus } from "../models/enums";
+import { useUI } from "../app/ui";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -25,6 +26,7 @@ const buildBooksMap = () => {
 export default function MyLoans() {
   const user = AuthService.currentUser();
   const userId = user?.id;
+  const { t } = useUI();
   const [loans, setLoans] = useState(() =>
     userId ? LoansService.myLoans(userId) : []
   );
@@ -54,7 +56,7 @@ export default function MyLoans() {
       // serviciul validează utilizatorul și actualizează stocul
       LoansService.returnLoan(loanId, user);
       reload();
-      setMessage({ type: "success", text: "Împrumutul a fost returnat." });
+      setMessage({ type: "success", text: t("msg.loanReturned") });
     } catch (err) {
       setMessage({ type: "error", text: err.message });
     }
@@ -66,9 +68,9 @@ export default function MyLoans() {
       <div className="page-content">
         <div className="page-header">
           <div>
-            <p className="eyebrow">Împrumuturi</p>
-            <h1>Istoricul împrumuturilor mele</h1>
-            <p className="muted">Returnează volumele direct din aplicație.</p>
+            <p className="eyebrow">{t("nav.myLoans")}</p>
+            <h1>{t("loans.title")}</h1>
+            <p className="muted">{t("loans.subtitle")}</p>
           </div>
         </div>
 
@@ -86,7 +88,7 @@ export default function MyLoans() {
         )}
 
         {loans.length === 0 ? (
-          <p className="muted">Încă nu ai împrumutat nicio carte.</p>
+          <p className="muted">{t("loans.empty")}</p>
         ) : (
           <div className="form-grid">
             {loans.map((loan) => {
@@ -97,7 +99,7 @@ export default function MyLoans() {
                   <div className="flex-between">
                     <div>
                       <h3 style={{ margin: "0 0 0.3rem" }}>
-                        {book?.title ?? "Carte ștearsă"}
+                        {book?.title ?? t("books.deleted")}
                       </h3>
                       <p className="muted">{book?.author}</p>
                     </div>
@@ -109,13 +111,16 @@ export default function MyLoans() {
                         .join(" ")
                         .trim()}
                     >
-                      {LoanStatusLabels[loan.status] ?? loan.status}
+                      {t(`loan.status.${loan.status}`)}
                     </span>
                   </div>
                   <div style={{ display: "grid", gap: "0.4rem" }}>
-                    <p className="muted">Împrumutată: {formatDate(loan.loanDate)}</p>
                     <p className="muted">
-                      Returnată: {loan.returnDate ? formatDate(loan.returnDate) : "-"}
+                      {t("loans.borrowedAt")}: {formatDate(loan.loanDate)}
+                    </p>
+                    <p className="muted">
+                      {t("loans.returnedAt")}:{" "}
+                      {loan.returnDate ? formatDate(loan.returnDate) : "-"}
                     </p>
                   </div>
                   <div className="text-right">
@@ -125,7 +130,7 @@ export default function MyLoans() {
                       disabled={!isBorrowed}
                       onClick={() => handleReturn(loan.id)}
                     >
-                      Marchează drept returnată
+                      {t("loans.returnAction")}
                     </button>
                   </div>
                 </article>
